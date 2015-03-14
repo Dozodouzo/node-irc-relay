@@ -105,7 +105,7 @@ class Anidb extends RegexUrlMatcher
     english_name = @get_english_title(t_list) or name
     msg = name + (if name is exact_name then "" else " officially known as #{exact_name}")
     msg += " (#{english_name})" unless english_name is exact_name
-    cb "#{msg}. http://anidb.net/perl-bin/animedb.pl?show=anime&aid=#{aid}"
+    cb "#{msg}. http://anidb.net/a#{aid}"
     @get_info aid, ({description}) =>
       cb description
 
