@@ -5,7 +5,7 @@
     "server_password": "<needed>",
     "port": "<needed>",
     "catch_all_exceptions": <true or false>,
-    "baseURL": "<url with protocol>"
+    "baseURL": "<url with protocol>",
 	"load_modules" : {
 		"restriction": "<none|whitelist|blacklist>",
 		"modules": []
