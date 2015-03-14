@@ -73,8 +73,8 @@ class Anidb extends RegexUrlMatcher
       [null, tokens]
 
   url: (search_for) =>
-    param_string = _({task: "search", query: search_for}).stringify()
-    "http://anisearch.outrance.pl/?#{param_string}"
+    param_search = _({task: "search", query: search_for}).stringify()
+    "http://anisearch.outrance.pl/?#{param_search}"
 
   ani_search: (search_for, cb) =>
     _.requestXmlAsJson {uri: @url(search_for)}, (error, data) =>
