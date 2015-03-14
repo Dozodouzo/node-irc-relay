@@ -17,7 +17,7 @@ module.exports = ({channel, server, nick, server_password}) ->
 
   misakify = (command, result) ->
     adjectives = misaka_adjectives["generic"]
-    "#{result}, said #{nick} #{_(adjectives).rand()}"
+    "#{result}"
 
   bot.channel_say = (msg, dont_misakify) =>
     return unless msg
