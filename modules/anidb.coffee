@@ -23,8 +23,8 @@ class Anidb extends RegexUrlMatcher
     @get_info match[1], ({titles: [{title: t_list}], description}) =>
       english_title = @get_english_title(t_list)
       title_string = _(t_list).find(({type}) => type is 'main')['#']
-      title_string += "\x0309 (#{english_title})" if english_title
-      @emitter "\x0302That anidb link is: #{title_string}. #{description}"
+      title_string += " (\x0309#{english_title})" if english_title
+      @emitter "\x0302That anidb link is: #{title_string}. \x0305#{description}"
 
   get_english_title: (t_list, extract) =>
     match = (lang_name, type_name) =>
@@ -107,10 +107,10 @@ class Anidb extends RegexUrlMatcher
     exact_name = _(t_list).find(({exact}) => exact)?['#'] or name
     english_name = @get_english_title(t_list) or name
     msg = name + (if name is exact_name then "" else "\x035 also known as #{exact_name}\x0302")
-    msg += "\x0309 (#{english_name})" unless english_name is exact_name
+    msg += " (\x0309#{english_name})" unless english_name is exact_name
     cb "\x0302#{msg}. http://anidb.net/a#{aid}"
     @get_info aid, ({description}) =>
-      cb description
+      cb "\x0305#{description}"
 
   display_options: (search_tokens, animes, cb) =>
     list_str = _(animes).chain().
