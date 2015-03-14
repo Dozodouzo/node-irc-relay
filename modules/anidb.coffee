@@ -14,7 +14,9 @@ class Anidb extends RegexUrlMatcher
     super
     @commands = {a: @command}
     @command._help = "search anidb for the anime that matches the terms. !a <name> lists all the matches, or the show if there is only one match. !a x <name> gives you the xth match."
-  regexes: ["/http:\/\/anidb\.net\/perl-bin\/animedb.pl\?(?:.*)aid=(\d+)(?:.*)/", "/http:\/\/anidb\.net\/a(\d+)(?:.*)/"]
+  regexes: [/http:\/\/anidb\.net\/perl-bin\/animedb.pl\?(?:.*)aid=(\d+)(?:.*)/,
+            /http:\/\/anidb\.net\/a(\d+)(?:.*)/
+	   ]
 
   on_match: (from, match) =>
     @get_info match[1], ({titles: [{title: t_list}], description}) =>
