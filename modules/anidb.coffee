@@ -109,8 +109,8 @@ class Anidb extends RegexUrlMatcher
     msg = name + (if name is exact_name then "" else "\x035 also known as #{exact_name}\x0302")
     msg += " (\x0309#{english_name})" unless english_name is exact_name
     cb "\x0302#{msg}. http://anidb.net/a#{aid}"
-    @get_info aid, ({description: d, type: t, startdate: s, enddate: e}) =>
-      cb "\x0305#{d} #{t} #{s} #{e}"
+    @get_info aid, ({description: d, type: t1, startdate: s, enddate: e}) =>
+      cb "\x0305#{d} #{t1} #{s} #{e}"
 
   display_options: (search_tokens, animes, cb) =>
     list_str = _(animes).chain().
