@@ -4,7 +4,7 @@ RegexUrlMatcher = require("#{__dirname}/base/regex_url_matcher")
 
 param_string = _({
   request: 'anime',
-  client: 'misakatron',
+  client: 'justatest',
   clientver: '1',
   protover: '1'
 }).stringify()
@@ -12,7 +12,7 @@ param_string = _({
 class Anidb extends RegexUrlMatcher
   constructor: ({@emitter}) ->
     super
-    @commands = {a: @command}
+    @commands = {anidb: @command}
     @command._help = "search anidb for the anime that matches the terms. !a <name> lists all the matches, or the show if there is only one match. !a x <name> gives you the xth match."
   regexes: [
     /http:\/\/anidb\.net\/perl-bin\/animedb.pl\?(?:.*)aid=(\d+)(?:.*)/,
@@ -109,8 +109,8 @@ class Anidb extends RegexUrlMatcher
     msg = name + (if name is exact_name then "" else "\x035 also known as #{exact_name}\x0302")
     msg += " (\x0309#{english_name})" unless english_name is exact_name
     cb "\x0302#{msg}. http://anidb.net/a#{aid}"
-    @get_info aid, ({description}) =>
-      cb "\x0305#{description}"
+    @get_info aid, ({description: d, type: t, startdate: s, enddate: e}) =>
+      cb "\x0305#{d} #{t} #{s} #{e}"
 
   display_options: (search_tokens, animes, cb) =>
     list_str = _(animes).chain().
