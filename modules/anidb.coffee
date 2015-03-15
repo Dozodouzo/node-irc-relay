@@ -108,12 +108,15 @@ class Anidb extends RegexUrlMatcher
     english_name = @get_english_title(t_list) or name
     msg = name + (if name is exact_name then "" else "\x035 also known as #{exact_name}\x0302")
     msg += " (\x0309#{english_name})" unless english_name is exact_name
-    cb "\x0302#{msg}. http://anidb.net/a#{aid}"
     @get_info aid, ({description: d, type: t, startdate: s, enddate: e}) =>
-      dirtydescription = "#{d}"
-      cleandescription = dirtydescription.replace(/https?:\/\/[a-z][\/ \w.]*/g, "");
-      cleandescription = cleandescription.replace(/[\[\]]/g, "");
-      cb "\x0305#{cleandescription} #{t} #{s} #{e}"
+      cb "#{msg} #{t} #{s} #{e}"
+      desc_array = array: [
+        /https?:\/\/[a-z][\/ \w.]*/g,
+        /[\[\]]/g,
+        /([^\s][\s\S]{0,400}(?!=[^\s]))([\s])/g
+        ]
+      clean_desc = desc_array.reduce(((acc, e) => acc.replace(e, "")), d)
+      cb "#{clean_desc}... check http://anidb.net/a#{aid} for the full description"
 
   display_options: (search_tokens, animes, cb) =>
     list_str = _(animes).chain().
