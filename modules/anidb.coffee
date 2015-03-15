@@ -114,7 +114,7 @@ class Anidb extends RegexUrlMatcher
       clean_desc = dirty_desc.replace(/https?:\/\/[a-z][\/ \w.]*/g, "");
       clean_desc = clean_desc.replace(/[\[\]]/g, "");
       clean_desc = clean_desc.replace(/Source:.*\n.*/g, "");
-#      clean_desc = clean_desc.replace(/([^\s][\s\S]{0,400}(?!=[^\s]))([\s])/g, "");
+      clean_desc = clean_desc.replace(/.{400}/g, "");
       cb "#{clean_desc}... check http://anidb.net/a#{aid} for the full description"
 
   display_options: (search_tokens, animes, cb) =>
