@@ -25,7 +25,7 @@ class Count
   parse: (tokens) =>
     number = Number(_(tokens).first() or 5)
     return [number, "I need a valid number to countdown from"] unless _(number).isFinite()
-    return [number, "Please be reasonable. I do not have enought sticks and stones to count down from #{number}"] if number > 7
+    return [number, "Please be reasonable. I do not have enought sticks and stones to count down from #{number}. Try using a number less than 8."] if number > 7
     return [number, "I can only count from numbers greater than 0"] if number < 0
     [number]
 
