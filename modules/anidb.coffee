@@ -115,6 +115,7 @@ class Anidb extends RegexUrlMatcher
       clean_desc = clean_desc.replace(/[\[\]]/g, "");
       clean_desc = clean_desc.replace(/Source:.*\n?.*/g, "");
       clean_desc = clean_desc.replace(/\r?\n|\r/g, " ")
+      if clean_desc.length > 400 then clean_desc = clean_desc.substring(0,400)
       cb if clean_desc is "undefined" then "check http://anidb.net/a#{aid} for more information." else "#{clean_desc}... check http://anidb.net/a#{aid} for the full description."
 #      cb "#{clean_desc}... check http://anidb.net/a#{aid} for the full description"
 
