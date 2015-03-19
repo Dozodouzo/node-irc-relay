@@ -108,16 +108,19 @@ class Anidb extends RegexUrlMatcher
     english_name = @get_english_title(t_list) or name
     msg = name + (if name is exact_name then "" else "\x035 also known as #{exact_name}\x0302")
     msg += " (\x0309#{english_name})" unless english_name is exact_name
-    @get_info aid, ({description: d, type: t, startdate: s, enddate: e}) =>
-      cb "#{msg} #{t} #{s} #{e}"
+    @get_info aid, ({description: d, type: t, episodecount: ep, startdate: s, enddate: e}) =>
+      s = if s == undefined then "TBD" else s
+      e = if e == undefined then "TBD" else e
+      cb "\[Anime: #{msg}\] - \[#{t}\] - \[Episodes: #{ep}\] - \[Airdates: #{s} / #{e}\]"
       dirty_desc = "#{d}"
       clean_desc = dirty_desc.replace(/https?:\/\/[a-z][\/ \w.]*/g, "");
       clean_desc = clean_desc.replace(/[\[\]]/g, "");
       clean_desc = clean_desc.replace(/Source:.*\n?.*/g, "");
       clean_desc = clean_desc.replace(/\r?\n|\r/g, " ")
-      if clean_desc.length > 400 then clean_desc = clean_desc.substring(0,400)
-      cb if clean_desc is "undefined" then "check http://anidb.net/a#{aid} for more information." else "#{clean_desc}... check http://anidb.net/a#{aid} for the full description."
-
+      clean_desc = if clean_desc == "undefined" then "Check http://anidb.net/a#{aid} for more information." else clean_desc = if clean_desc.length < 350 then "#{clean_desc} \nCheck http://anidb.net/a#{aid} for more information." else clean_desc
+      clean_desc = if clean_desc.length > 350 then clean_desc.substring(0,350) + " \[...\]\nCheck http://anidb.net/a#{aid} for the full summary." else clean_desc
+      cb "#{clean_desc}"
+      
   display_options: (search_tokens, animes, cb) =>
     list_str = _(animes).chain().
       first(7).
