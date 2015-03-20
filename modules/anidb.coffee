@@ -106,8 +106,7 @@ class Anidb extends RegexUrlMatcher
     name = _(t_list).find(({type}) => type is 'main')['#']
     exact_name = _(t_list).find(({exact}) => exact)?['#'] or name
     english_name = @get_english_title(t_list) or name
-    msg = name + (if name is exact_name then "" else "\x035 also known as #{exact_name}\x0302")
-    msg += " (\x0309#{english_name})" unless english_name is exact_name
+    msg = name + (if name is exact_name then "" else " also known as #{exact_name}")
     @get_info aid, ({description: d, type: t, episodecount: c, startdate: s, enddate: e}) =>
       s = if s == undefined then "\u000304TBD\u000f" else s
       e = if e == undefined then "\u000304TBD\u000f" else e
