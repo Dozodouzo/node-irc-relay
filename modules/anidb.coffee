@@ -20,12 +20,21 @@ class Anidb extends RegexUrlMatcher
     ]
 
   on_match: (from, match) =>
-    @get_info match[1], ({titles: [{title: t_list}], description}) =>
+    @get_info match[1], ({titles: [{title: t_list}], description, episodecount, type: t, startdate, enddate}) =>
       english_title = @get_english_title(t_list)
       title_string = _(t_list).find(({type}) => type is 'main')['#']
       title_string += " (#{english_title})" if english_title
-      @emitter "Anime: #{title_string}. #{description}"
-
+      startdate = if startdate == undefined then "\u000304TBD\u000f" else startdate
+      enddate = if enddate == undefined then "\u000304TBD\u000f" else enddate
+      episodecount = if "#{episodecount}" == "0" then "\u000304TBD\u000f" else episodecount
+      dirty_desc = "#{description}"
+      clean_desc = dirty_desc.replace(/https?:\/\/[a-z][\/ \w.]*/g, "");
+      clean_desc = clean_desc.replace(/[\[\]]/g, "");
+      clean_desc = clean_desc.replace(/Source:.*\n?.*/g, "");
+      clean_desc = clean_desc.replace(/\r?\n|\r/g, " ")
+      clean_desc = if clean_desc == "undefined" then "" else if clean_desc.length > 350 then clean_desc.substring(0,350) + " \[...\]\nCheck http://anidb.net/a for the full summary." else clean_desc
+      @emitter "[Anime: #{title_string}\] - \[#{t}\] - \[Episodes: #{episodecount}\] - \[Airdates: #{startdate} / #{enddate}\] \n#{clean_desc}"
+      
   get_english_title: (t_list, extract) =>
     match = (lang_name, type_name) =>
       _(t_list).find ({lang, type}) => lang is lang_name and type is type_name
@@ -33,9 +42,10 @@ class Anidb extends RegexUrlMatcher
       match("en", "synonym") or
       match("x-jat", "synonym")
     english_node?['#']
-
-  get_english_title_anidb: (t_list) =>
-    get_english_title _(t_list).map ({"xml:lang": lang, type}) => {lang: lang, type: type}
+    
+# // Is this even used ?
+#  get_english_title_anidb: (t_list) =>
+#    get_english_title _(t_list).map ({"xml:lang": lang, type}) => {lang: lang, type: type}
 
   get_info: (aid, cb) =>
     url = "http://api.anidb.net:9001/httpapi?#{param_string}&aid=#{aid}"
