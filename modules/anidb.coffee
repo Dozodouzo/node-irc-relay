@@ -20,10 +20,13 @@ class Anidb extends RegexUrlMatcher
     ]
 
   on_match: (from, match) =>
-    @get_info match[1], ({titles: [{title: t_list}], description, episodecount, type: t, startdate, enddate}) =>
+    @get_info match[1], ({titles: [{title: t_list}], categories: [{category: c_list}], description, episodecount, type: t, startdate, enddate}) =>
       english_title = @get_english_title(t_list)
       title_string = _(t_list).find(({type}) => type is 'main')['#']
       title_string += " (#{english_title})" if english_title
+      cat_string = _.chain(c_list).filter(({weight}) => weight is '600').pluck('name').value()
+      cat_string = "#{cat_string}"
+      cat_string = if cat_string == undefined then cat_string = "\u000304TBD\u000f" else cat_string = cat_string.split(',').join(', ');
       startdate = if startdate == undefined then "\u000304TBD\u000f" else startdate
       enddate = if enddate == undefined then "\u000304TBD\u000f" else enddate
       episodecount = if "#{episodecount}" == "0" then "\u000304TBD\u000f" else episodecount
@@ -32,8 +35,8 @@ class Anidb extends RegexUrlMatcher
       clean_desc = clean_desc.replace(/[\[\]]/g, "");
       clean_desc = clean_desc.replace(/Source:.*\n?.*/g, "");
       clean_desc = clean_desc.replace(/\r?\n|\r/g, " ")
-      clean_desc = if clean_desc == "undefined" then "" else if clean_desc.length > 350 then clean_desc.substring(0,350) + " \[...\]\nCheck http://anidb.net/a for the full summary." else clean_desc
-      @emitter "[Anime: #{title_string}\] - \[#{t}\] - \[Episodes: #{episodecount}\] - \[Airdates: #{startdate} / #{enddate}\] \n#{clean_desc}"
+      clean_desc = if clean_desc == undefined then "" else if clean_desc.length > 350 then clean_desc.substring(0,350) + " \[...\] Check the link above for the full summary." else clean_desc
+      @emitter "\[Anime: #{title_string}\] - \[#{t}\] - \[Episodes: #{episodecount}\] - \[Airdates: #{startdate} / #{enddate}\] - \[Categories: #{cat_string}\]\n#{clean_desc}"
       
   get_english_title: (t_list, extract) =>
     match = (lang_name, type_name) =>
