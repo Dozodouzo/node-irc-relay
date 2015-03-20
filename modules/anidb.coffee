@@ -108,10 +108,11 @@ class Anidb extends RegexUrlMatcher
     english_name = @get_english_title(t_list) or name
     msg = name + (if name is exact_name then "" else "\x035 also known as #{exact_name}\x0302")
     msg += " (\x0309#{english_name})" unless english_name is exact_name
-    @get_info aid, ({description: d, type: t, episodecount: ep, startdate: s, enddate: e}) =>
-      s = if s == undefined then "TBD" else s
-      e = if e == undefined then "TBD" else e
-      cb "\[Anime: #{msg}\] - \[#{t}\] - \[Episodes: #{ep}\] - \[Airdates: #{s} / #{e}\]"
+    @get_info aid, ({description: d, type: t, episodecount: c, startdate: s, enddate: e}) =>
+      s = if s == undefined then "\u000304TBD\u000f" else s
+      e = if e == undefined then "\u000304TBD\u000f" else e
+      c = if "#{c}" == "0" then "\u000304TBD\u000f" else c
+      cb "\[Anime: #{msg}\] - \[#{t}\] - \[Episodes: #{c}\] - \[Airdates: #{s} / #{e}\]"
       dirty_desc = "#{d}"
       clean_desc = dirty_desc.replace(/https?:\/\/[a-z][\/ \w.]*/g, "");
       clean_desc = clean_desc.replace(/[\[\]]/g, "");
