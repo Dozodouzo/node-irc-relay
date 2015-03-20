@@ -13,7 +13,7 @@ class Anidb extends RegexUrlMatcher
   constructor: ({@emitter}) ->
     super
     @commands = {anidb: @command}
-    @command._help = "search anidb for the anime that matches the terms. !a <name> lists all the matches, or the show if there is only one match. !a x <name> gives you the xth match."
+    @command._help = "search anidb for the anime that matches the terms. !anidb <name> lists all the matches, or the show if there is only one match. !anidb x <name> gives you the xth match."
   regexes: [
     /http:\/\/anidb\.net\/perl-bin\/animedb.pl\?(?:.*)aid=(\d+)(?:.*)/,
     /http:\/\/anidb\.net\/a(\d+)(?:.*)/
@@ -23,8 +23,8 @@ class Anidb extends RegexUrlMatcher
     @get_info match[1], ({titles: [{title: t_list}], description}) =>
       english_title = @get_english_title(t_list)
       title_string = _(t_list).find(({type}) => type is 'main')['#']
-      title_string += " (\x0309#{english_title})" if english_title
-      @emitter "\x0302That anidb link is: #{title_string}. \x0305#{description}"
+      title_string += " (#{english_title})" if english_title
+      @emitter "Anime: #{title_string}. #{description}"
 
   get_english_title: (t_list, extract) =>
     match = (lang_name, type_name) =>
