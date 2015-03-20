@@ -47,8 +47,8 @@ class Anidb extends RegexUrlMatcher
     english_node?['#']
     
 # // Is this even used ?
-#  get_english_title_anidb: (t_list) =>
-#    get_english_title _(t_list).map ({"xml:lang": lang, type}) => {lang: lang, type: type}
+  get_english_title_anidb: (t_list) =>
+   get_english_title _(t_list).map ({"xml:lang": lang, type}) => {lang: lang, type: type}
 
   get_info: (aid, cb) =>
     url = "http://api.anidb.net:9001/httpapi?#{param_string}&aid=#{aid}"
