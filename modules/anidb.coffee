@@ -1,43 +1,20 @@
-#provides a command to query anidb and a url matcher to identify anidb urls
-_ = require('../utils')
-RegexUrlMatcher = require("#{__dirname}/base/regex_url_matcher")
-
-param_string = _({
-  request: 'anime',
-  client: 'justatest',
-  clientver: '1',
-  protover: '1'
-}).stringify()
-
 class Anidb extends RegexUrlMatcher
   constructor: ({@emitter}) ->
     super
-    @commands = {anidb: @command}
-    @command._help = "search anidb for the anime that matches the terms. !anidb <name> lists all the matches, or the show if there is only one match. !anidb x <name> gives you the xth match."
+    @commands = {a: @command}
+    @command._help = "search anidb for the anime that matches the terms. !a <name> lists all the matches, or the show if there is only one match. !a x <name> gives you the xth match."
 #  regexes: [
 #    /http:\/\/anidb\.net\/perl-bin\/animedb.pl\?(?:.*)aid=(\d+)(?:.*)/,
 #    /http:\/\/anidb\.net\/a(\d+)(?:.*)/
 #    ]
 
 #  on_match: (from, match) =>
-#    @get_info match[1], ({titles: [{title: t_list}], categories: [{category: c_list}], description, episodecount, type: t, startdate, enddate}) =>
+#    @get_info match[1], ({titles: [{title: t_list}], description}) =>
 #      english_title = @get_english_title(t_list)
 #      title_string = _(t_list).find(({type}) => type is 'main')['#']
-#      title_string += " (#{english_title})" if english_title
-#      cat_string = _.chain(c_list).filter(({weight}) => weight is '600').pluck('name').value()
-#      cat_string = "#{cat_string}"
-#      cat_string = if cat_string == undefined then cat_string = "\u000304TBD\u000f" else cat_string = cat_string.split(',').join(', ');
-#      startdate = if startdate == undefined then "\u000304TBD\u000f" else startdate
-#      enddate = if enddate == undefined then "\u000304TBD\u000f" else enddate
-#      episodecount = if "#{episodecount}" == "0" then "\u000304TBD\u000f" else episodecount
-#      dirty_desc = "#{description}"
-#      clean_desc = dirty_desc.replace(/https?:\/\/[a-z][\/ \w.]*/g, "");
-#      clean_desc = clean_desc.replace(/[\[\]]/g, "");
-#      clean_desc = clean_desc.replace(/Source:.*\n?.*/g, "");
-#      clean_desc = clean_desc.replace(/\r?\n|\r/g, " ")
-#      clean_desc = if clean_desc == undefined then "" else if clean_desc.length > 350 then clean_desc.substring(0,350) + " \[...\] Check the link above for the full summary." else clean_desc
-#      @emitter "\[Anime: #{title_string}\] - \[#{t}\] - \[Episodes: #{episodecount}\] - \[Airdates: #{startdate} / #{enddate}\] - \[Categories: #{cat_string}\]\n#{clean_desc}"
-      
+#      title_string += " (\x0309#{english_title})" if english_title
+#      @emitter "\x0302That anidb link is: #{title_string}. \x0305#{description}"
+
   get_english_title: (t_list, extract) =>
     match = (lang_name, type_name) =>
       _(t_list).find ({lang, type}) => lang is lang_name and type is type_name
@@ -45,10 +22,9 @@ class Anidb extends RegexUrlMatcher
       match("en", "synonym") or
       match("x-jat", "synonym")
     english_node?['#']
-    
-# // Is this even used ?
+
   get_english_title_anidb: (t_list) =>
-   get_english_title _(t_list).map ({"xml:lang": lang, type}) => {lang: lang, type: type}
+    get_english_title _(t_list).map ({"xml:lang": lang, type}) => {lang: lang, type: type}
 
   get_info: (aid, cb) =>
     url = "http://api.anidb.net:9001/httpapi?#{param_string}&aid=#{aid}"
@@ -120,23 +96,24 @@ class Anidb extends RegexUrlMatcher
     exact_name = _(t_list).find(({exact}) => exact)?['#'] or name
     english_name = @get_english_title(t_list) or name
     msg = name + (if name is exact_name then "" else " also known as #{exact_name}")
-    @get_info aid, ({categories: [{category: c_list}], description: d, type: t, episodecount: c, startdate: s, enddate: e}) =>
-      cat_string = _.chain(c_list).filter(({weight}) => weight is '600').pluck('name').value()
-      cat_string = "#{cat_string}"
-      cat_string = if cat_string == undefined then cat_string = "\u000304TBD\u000f" else cat_string = cat_string.split(',').join(', ')
-      s = if s == undefined then "\u000304TBD\u000f" else s
-      e = if e == undefined then "\u000304TBD\u000f" else e
-      c = if "#{c}" == "0" then "\u000304TBD\u000f" else c
-      cb "\[Anime: #{msg}\] - \[#{t}\] - \[Episodes: #{c}\] - \[Airdates: #{s} / #{e}\] - \[Categories: #{cat_string}\]"
+    @get_info aid, ({tags: [{tag: c_list}], description: d, type: t, episodecount: c, startdate: s, enddate: e}) =>
+      cat_string = _.chain(c_list).sortBy('weight').reverse().pluck('name').value()
+      cat_string = JSON.stringify(cat_string)
+      cat_string = cat_string.replace(/[\[\]"]/g, "")
+      cat_string = cat_string.replace(/description.missing,? ?/ig, "")
+      cat_string = cat_string.replace(/meta.tags,? ?/ig, "")
+      cat_string = if cat_string == "" then cat_string = "\u0002\u000304N/A\u000f" else cat_string.split(',', 6).join(', ')
+      s = if s == undefined then "\u0002\u000304TBD\u000f" else s
+      e = if e == undefined then "\u0002\u000304TBD\u000f" else e
+      c = if "#{c}" == "0" then "\u0002\u000304TBD\u000f" else c
       dirty_desc = "#{d}"
       clean_desc = dirty_desc.replace(/https?:\/\/[a-z][\/ \w.]*/g, "");
       clean_desc = clean_desc.replace(/[\[\]]/g, "");
       clean_desc = clean_desc.replace(/Source:.*\n?.*/g, "");
       clean_desc = clean_desc.replace(/\r?\n|\r/g, " ")
-      clean_desc = if clean_desc == "undefined" then "Check http://anidb.net/a#{aid} for more information." else clean_desc = if clean_desc.length < 350 then "#{clean_desc} \nCheck http://anidb.net/a#{aid} for more information." else clean_desc
-      clean_desc = if clean_desc.length > 350 then clean_desc.substring(0,350) + " \[...\]\nCheck http://anidb.net/a#{aid} for the full summary." else clean_desc
-      cb "#{clean_desc}"
-      
+      clean_desc = if clean_desc == "undefined" then "Check http://anidb.net/a#{aid} for more information." else clean_desc = if clean_desc.length > 351 then clean_desc.substring(0,351) + " \[...\]\nCheck http://anidb.net/a#{aid} for the full summary." else clean_desc = if clean_desc.length < 350 then "#{clean_desc} \nCheck http://anidb.net/a#{aid} for more information." else clean_desc
+      cb "\[Anime: #{msg}\] - \[#{t}\] - \[Episodes: #{c}\] - \[Airdates: #{s} / #{e}\] - \[Tags: #{cat_string}\]\n#{clean_desc}"
+
   display_options: (search_tokens, animes, cb) =>
     list_str = _(animes).chain().
       first(7).
