@@ -1,3 +1,13 @@
+_ = require('../utils')
+RegexUrlMatcher = require("#{__dirname}/base/regex_url_matcher")
+
+param_string = _({
+  request: 'anime',
+  client: 'justatest',
+  clientver: '1',
+  protover: '1'
+}).stringify()
+
 class Anidb extends RegexUrlMatcher
   constructor: ({@emitter}) ->
     super
