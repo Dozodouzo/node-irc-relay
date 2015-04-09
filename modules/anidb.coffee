@@ -106,23 +106,19 @@ class Anidb extends RegexUrlMatcher
     exact_name = _(t_list).find(({exact}) => exact)?['#'] or name
     english_name = @get_english_title(t_list) or name
     msg = name + (if name is exact_name then "" else " also known as #{exact_name}")
-    @get_info aid, ({tags: [{tag: c_list}], description: d, type: t, episodecount: c, startdate: s, enddate: e}) =>
-      cat_string = _.chain(c_list).sortBy('weight').reverse().pluck('name').value()
-      cat_string = JSON.stringify(cat_string)
-      cat_string = cat_string.replace(/[\[\]"]/g, "")
-      cat_string = cat_string.replace(/description.missing,? ?/ig, "")
-      cat_string = cat_string.replace(/meta.tags,? ?/ig, "")
-      cat_string = if cat_string == "" then cat_string = "\u0002\u000304N/A\u000f" else cat_string.split(',', 6).join(', ')
-      s = if s == undefined then "\u0002\u000304TBD\u000f" else s
-      e = if e == undefined then "\u0002\u000304TBD\u000f" else e
-      c = if "#{c}" == "0" then "\u0002\u000304TBD\u000f" else c
-      dirty_desc = "#{d}"
-      clean_desc = dirty_desc.replace(/https?:\/\/[a-z][\/ \w.]*/g, "");
-      clean_desc = clean_desc.replace(/[\[\]]/g, "");
-      clean_desc = clean_desc.replace(/Source:.*\n?.*/g, "");
-      clean_desc = clean_desc.replace(/\r?\n|\r/g, " ")
-      clean_desc = if clean_desc == "undefined" then "Check http://anidb.net/a#{aid} for more information." else clean_desc = if clean_desc.length > 351 then clean_desc.substring(0,351) + " \[...\]\nCheck http://anidb.net/a#{aid} for the full summary." else clean_desc = if clean_desc.length < 350 then "#{clean_desc} \nCheck http://anidb.net/a#{aid} for more information." else clean_desc
-      cb "\[Anime: #{msg}\] - \[#{t}\] - \[Episodes: #{c}\] - \[Airdates: #{s} / #{e}\] - \[Tags: #{cat_string}\]\n#{clean_desc}"
+    @get_info aid, (result) =>
+      c_array = if result.tags? then result.tags[0].tag else ""
+      if c_array == "" then c_array else c_array = _.chain(c_array).sortBy('weight').reverse().pluck('name').flatten().without('new', 'DESCRIPTION MISSING', 'meta tags', 'elements', 'original work', 'Earth', 'Japan', 'Asia').value()
+      c_array = if c_array == "" then "\u0002\u000304N/A\u000f" else JSON.stringify(c_array).replace(/[\[\]\"]/g, "").split(',', 6).join(', ')
+      c_desc = if result.description? then "#{result.description}" else ""
+      c_desc = if c_desc == "" then c_desc else c_desc.replace(/https?:\/\/[a-z][\/ \w.]*/g, "").replace(/[\[\]]/g, "").replace(/Source:.*\n?.*/g, "").replace(/\r?\n|\r/g, " ")
+      c_desc = if c_desc == "" then "" else c_desc = if c_desc.length > 435 then c_desc.substring(0,435) + "\[...\]" else c_desc = if c_desc.length < 435 then c_desc else c_desc
+      t = result.type
+      s = if not result.startdate? then "\u0002\u000304TBD\u000f" else result.startdate
+      e = if not result.enddate? then "\u0002\u000304TBD\u000f" else result.enddate
+      c = if not result.episodecount? then "\u0002\u000304TBD\u000f" else result.episodecount
+      c = if c == "0" then "\u0002\u000304TBD\u000f" else result.episodecount
+      cb "\[Anime: #{msg}\] - \[#{t}\] - \[Episodes: #{c}\] - \[Airdates: #{s} / #{e}\] - \[Tags: #{c_array}\] - \[Link: http://anidb.net/a#{aid} \]\n#{c_desc}"
 
   display_options: (search_tokens, animes, cb) =>
     list_str = _(animes).chain().
