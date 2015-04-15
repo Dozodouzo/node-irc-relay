@@ -43,7 +43,7 @@ class Anidb extends RegexUrlMatcher
 
   command: (from, tokens, cb) =>
     @parse_query tokens, (error, number, search_tokens) =>
-      return cb("a! <anime name>") if error
+      return cb("!a <anime name>") if error
       query_fn = if @is_inexact_query(search_tokens) then @inexact else @exact
       query_fn search_tokens, (animes) =>
         animes = [animes] unless _(animes).isArray()
@@ -107,8 +107,11 @@ class Anidb extends RegexUrlMatcher
     english_name = @get_english_title(t_list) or name
     msg = name + (if name is exact_name then "" else " also known as #{exact_name}")
     @get_info aid, (result) =>
-      c_array = if result.tags? then result.tags[0].tag else ""
-      if c_array == "" then c_array else c_array = _.chain(c_array).sortBy('weight').reverse().pluck('name').flatten().without('new', 'DESCRIPTION MISSING', 'meta tags', 'elements', 'original work', 'Earth', 'Japan', 'Asia').value()
+      r_score = result.ratings?[0].permanent[0]['#'] ? "\u0002\u000304N/A\u000f"
+      r_votes = result.ratings?[0].permanent[0]['count'] ?  "\u0002\u000304N/A\u000f"
+      r_array = "#{r_score} / Votes: #{r_votes}"
+      c_array = result.tags?[0].tag ? ""
+      if c_array == "" then c_array else c_array = _.chain(c_array).sortBy('weight').reverse().pluck('name').flatten().without('new', 'technical aspects', 'target audience', 'DESCRIPTION MISSING', 'meta tags', 'elements', 'original work', 'Earth', 'Japan', 'Asia', 'themes', 'multi-anime projects').value()
       c_array = if c_array == "" then "\u0002\u000304N/A\u000f" else JSON.stringify(c_array).replace(/[\[\]\"]/g, "").split(',', 6).join(', ')
       c_desc = if result.description? then "#{result.description}" else ""
       c_desc = if c_desc == "" then c_desc else c_desc.replace(/https?:\/\/[a-z][\/ \w.]*/g, "").replace(/[\[\]]/g, "").replace(/Source:.*\n?.*/g, "").replace(/\r?\n|\r/g, " ")
@@ -116,9 +119,8 @@ class Anidb extends RegexUrlMatcher
       t = result.type
       s = if not result.startdate? then "\u0002\u000304TBD\u000f" else result.startdate
       e = if not result.enddate? then "\u0002\u000304TBD\u000f" else result.enddate
-      c = if not result.episodecount? then "\u0002\u000304TBD\u000f" else result.episodecount
-      c = if c == "0" then "\u0002\u000304TBD\u000f" else result.episodecount
-      cb "\[Anime: #{msg}\] - \[#{t}\] - \[Episodes: #{c}\] - \[Airdates: #{s} / #{e}\] - \[Tags: #{c_array}\] - \[Link: http://anidb.net/a#{aid} \]\n#{c_desc}"
+      c = if not result.episodecount? then "\u0002\u000304TBD\u000f" else if result.episodecount == "0" then "\u0002\u000304TBD\u000f" else result.episodecount
+      cb "\[Anime: #{msg}\] - \[#{t}\] - \[Episodes: #{c}\] - \[Airdates: #{s} / #{e}\] - \[Tags: #{c_array}\] - \[Rating: #{r_array}\] - \[Link: http://anidb.net/a#{aid} \]\n#{c_desc}"
 
   display_options: (search_tokens, animes, cb) =>
     list_str = _(animes).chain().
