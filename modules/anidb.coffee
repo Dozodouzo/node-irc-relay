@@ -111,7 +111,7 @@ class Anidb extends RegexUrlMatcher
       r_votes = result.ratings?[0].permanent[0]['count'] ?  "\u0002\u000304N/A\u000f"
       r_array = "#{r_score} / Votes: #{r_votes}"
       c_array = result.tags?[0].tag ? ""
-      if c_array == "" then c_array else c_array = _.chain(c_array).sortBy('weight').reverse().pluck('name').flatten().without('new', 'technical aspects', 'target audience', 'DESCRIPTION MISSING', 'meta tags', 'elements', 'original work', 'Earth', 'Japan', 'Asia', 'themes', 'multi-anime projects').value()
+      if c_array == "" then c_array else c_array = _.chain(c_array).filter((x) -> x.infobox).sortBy('weight').reverse().pluck('name').flatten().value()
       c_array = if c_array == "" then "\u0002\u000304N/A\u000f" else JSON.stringify(c_array).replace(/[\[\]\"]/g, "").split(',', 6).join(', ')
       c_desc = if result.description? then "#{result.description}" else ""
       c_desc = if c_desc == "" then c_desc else c_desc.replace(/https?:\/\/[a-z][\/ \w.]*/g, "").replace(/[\[\]]/g, "").replace(/Source:.*\n?.*/g, "").replace(/\r?\n|\r/g, " ")
