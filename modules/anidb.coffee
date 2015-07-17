@@ -111,17 +111,20 @@ class Anidb extends RegexUrlMatcher
       r_votes = result.ratings?[0].permanent[0]['count'] ?  "\u0002\u000304N/A\u000f"
       r_array = "#{r_score} / Votes: #{r_votes}"
       c_array = result.tags?[0].tag ? ""
-      if c_array == "" then c_array else c_array = _.chain(c_array).filter((x) -> x.infobox).sortBy('weight').reverse().pluck('name').flatten().value()
+      console.log(c_array)
+      if c_array == "" then "\u0002\u000304N/A\u000f" else c_array = _.chain(c_array).filter((x) -> x.infobox).sortBy('weight').reverse().pluck('name').flatten().value()
       c_array = if c_array == "" then "\u0002\u000304N/A\u000f" else JSON.stringify(c_array).replace(/[\[\]\"]/g, "").split(',', 6).join(', ')
       c_desc = if result.description? then "#{result.description}" else ""
       c_desc = if c_desc == "" then c_desc else c_desc.replace(/https?:\/\/[a-z][\/ \w.]*/g, "").replace(/[\[\]]/g, "").replace(/Source:.*\n?.*/g, "").replace(/\r?\n|\r/g, " ")
       c_desc = if c_desc == "" then "" else c_desc = if c_desc.length > 435 then c_desc.substring(0,435) + "\[...\]" else c_desc = if c_desc.length < 435 then c_desc else c_desc
       t = result.type
-      s = if not result.startdate? then "\u0002\u000304TBD\u000f" else result.startdate
-      e = if not result.enddate? then "\u0002\u000304TBD\u000f" else result.enddate
+      s = result.startdate[0] or "\u0002\u000304TBD\u000f"
+      s = if s == "\u0002\u000304TBD\u000f" then s else if s == "1970-01-01" then "\u0002\u000304TBD\u000f" else s
+      e = result.enddate[0] or "\u0002\u000304TBD\u000f"
+      e = if e == "\u0002\u000304TBD\u000f" then e else if e == "1970-01-01" then "\u0002\u000304TBD\u000f" else e
       c = if not result.episodecount? then "\u0002\u000304TBD\u000f" else if result.episodecount == "0" then "\u0002\u000304TBD\u000f" else result.episodecount
       cb "\[Anime: #{msg}\] - \[#{t}\] - \[Episodes: #{c}\] - \[Airdates: #{s} / #{e}\] - \[Tags: #{c_array}\] - \[Rating: #{r_array}\] - \[Link: http://anidb.net/a#{aid} \]\n#{c_desc}"
-
+      
   display_options: (search_tokens, animes, cb) =>
     list_str = _(animes).chain().
       first(7).
